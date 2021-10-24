@@ -1,0 +1,8 @@
+﻿<StaticWebAssets Version="1.0">
+  <ContentRoot BasePath="/" Path="C:\Users\rapha\source\repos\MundoJix\MundoJix\Client\bin\Debug\net5.0\wwwroot\" />
+  <ContentRoot BasePath="/" Path="C:\Users\rapha\source\repos\MundoJix\MundoJix\Client\obj\Debug\net5.0\scopedcss\bundle\" />
+  <ContentRoot BasePath="_content/BlazorInputFile" Path="C:\Users\rapha\.nuget\packages\blazorinputfile\0.2.0\build\..\staticwebassets\" />
+  <ContentRoot BasePath="_content/Microsoft.AspNetCore.Components.WebAssembly.Authentication" Path="C:\Users\rapha\.nuget\packages\microsoft.aspnetcore.components.webassembly.authentication\5.0.10\build\..\staticwebassets\" />
+  <ContentRoot BasePath="_content/Radzen.Blazor" Path="C:\Users\rapha\.nuget\packages\radzen.blazor\3.11.8\build\..\staticwebassets\" />
+  <ContentRoot BasePath="_content/Tewr.Blazor.FileReader" Path="C:\Users\rapha\.nuget\packages\tewr.blazor.filereader\3.2.0.21211\build\..\staticwebassets\" />
+</StaticWebAssets>

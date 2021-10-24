@@ -1,0 +1,25 @@
+﻿@page "/aluno/editar/{id:int}"
+@inject HttpClient http
+@inject NavigationManager navigation
+@using MundoJix.Shared.Models
+
+<h3>Editar Dados do Aluno</h3>
+
+<FormAluno Aluno="@aluno" ButtonText="Atualizar" OnValidSubmit="@EditarAlunos"></FormAluno>
+
+@code {
+     Aluno aluno = new Aluno();
+    [Parameter] public int id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        aluno = await http.GetFromJsonAsync<Aluno>($"api/aluno/{id}");
+    }
+
+    async Task EditarAlunos()
+    {
+        await http.PutAsJsonAsync("api/aluno", aluno);
+        navigation.NavigateTo("lista/aluno");
+    }
+
+}

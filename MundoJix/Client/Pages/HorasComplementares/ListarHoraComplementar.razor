@@ -1,0 +1,217 @@
+﻿@page "/hora/lista"
+@page "/hora"
+@inject HttpClient http
+@using System.Text.Json
+
+
+
+<MundoJix.Client.Pages.Modals.ModalCad.ModalHoracomplementar horasComplementares="@hora" alunos="@alunos" @ref="RefModal" onCancel="onCancelCad" onConfirm="onConfirmCad">
+</MundoJix.Client.Pages.Modals.ModalCad.ModalHoracomplementar>
+
+<MundoJix.Client.Pages.Modals.ModalEdit.ModalEditHoraComplementar horasComplementares="@hora" alunos="@alunos" Titulo="Editar dados do Paciente/Doador" @ref="RefModalEdit" onCancel="onCancelEdit" onConfirm="onConfirmEdit">
+</MundoJix.Client.Pages.Modals.ModalEdit.ModalEditHoraComplementar>
+
+<ModalForms Titulo="@Titulo" Subtitulo="@SubTitulo" @ref="RefModals" onCancel="onCancel">
+</ModalForms>
+
+<h2 align="center">Lista Para Inserção de Horas Complementares</h2>
+
+<div>
+    @if (horas == null)
+    {
+        <text>Carregando...</text>
+    }
+    else if (horas.Count == 0)
+    {
+        <table class="table table-borderless" align="center">
+            <thead class="thead-dark">
+                <tr align="center">
+                    <th>Nome</th>
+                    <th>Tipo Atividade</th>
+                    <th>Horas</th>
+                    <th>Status</th>
+
+                    <th><button class="btn btn-primary" @onclick="@(() => CadNewHora())">Nova Inserção</button></th>
+
+                </tr>
+            </thead>
+            <tbody>
+                <tr align="center">
+                    <th align="center" colspan="14"><h3 align="center">Não há nenhuma hora lançada em nosso sistema.</h3></th>
+                </tr>
+            </tbody>
+        </table>
+    }
+    else
+    {
+
+<table class="table table-hover table-borderless" align="center">
+    <thead class="thead-dark">
+        <tr align="center">
+            <th>Nome</th>
+            <th>Tipo Atividade</th>
+            <th>Horas</th>
+            <th>Status</th>
+
+            <th><button class="btn btn-primary" @onclick="@(() => CadNewHora())">Nova Inserção</button></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var pessoa in horas)
+        {
+            <tr align="center">
+                <td>@pessoa.AlunoID.ToString("")</td>
+                <td>@pessoa.TipoAtividade</td>
+                <td>@pessoa.QntHoras</td>
+                <td>@pessoa.Status</td>
+
+                <td>
+                    <button class="btn btn-success" @onclick="@(() => EditHora(pessoa))">Editar</button>
+                    <button class="btn btn-danger" @onclick="@(() => ExcluirHora(pessoa.Id))">Excluir</button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    }
+</div>
+
+@code {
+    @using MundoJix.Shared.Models
+    @using MundoJix.Client.Pages.Modals.ModalCad
+    @using MundoJix.Client.Pages.Modals.ModalEdit
+    List<HorasComplementares> horas;
+
+    List<Aluno> alunos;
+
+    HorasComplementares hora = new HorasComplementares();
+
+    ModalHoracomplementar RefModal;
+
+    ModalEditHoraComplementar RefModalEdit;
+
+    HorasComplementares horaEdit;
+
+    ModalForms RefModals;
+
+    string Titulo;
+    string SubTitulo;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadHora();
+        await LoadAluno();
+    }
+
+    async Task LoadHora()
+    {
+        horas = await http.GetFromJsonAsync<List<HorasComplementares>>($"api/hora");
+    }
+
+    async Task LoadAluno()
+    {
+        alunos = await http.GetFromJsonAsync<List<Aluno>>($"api/aluno");
+
+    }
+
+    async Task CriarHora()
+    {
+        await http.PostAsJsonAsync("api/hora", hora);
+    }
+
+    async Task onConfirmCad()
+    {
+        await Uniques(hora, horas);
+        RefModal.Hide();
+
+    }
+
+    public void onCancelCad()
+    {
+        RefModal.Hide();
+    }
+
+    public void onCancel()
+    {
+        RefModals.Hide();
+    }
+
+    async Task onConfirmEdit()
+    {
+        RefModalEdit.Hide();
+        await EditUniques(hora, horas );
+        await LoadHora();
+    }
+
+    public void onCancelEdit()
+    {
+        RefModalEdit.Hide();
+    }
+
+    public void ShowErrorModal()
+    {
+        RefModals.Show();
+    }
+
+    public void CadNewHora()
+    {
+        RefModal.Show();
+    }
+
+    public void EditHora(HorasComplementares hora)
+    {
+        horaEdit = hora;
+        RefModalEdit.Show();
+    }
+
+    async Task EditarHora()
+    {
+        await http.PutAsJsonAsync($"api/hora", horaEdit);
+        await LoadHora();
+    }
+
+    async Task ExcluirHora(int id)
+    {
+        await http.DeleteAsync($"api/hora/{id}");
+        await LoadHora();
+    }
+
+    async Task Uniques(HorasComplementares hora, List<HorasComplementares> lista)
+    {
+        foreach (HorasComplementares s in lista)
+        {
+            if (hora.Id == s.Id)
+            {
+
+                Titulo = "Erro ao Editar";
+                SubTitulo = "";
+
+                ShowErrorModal();
+                return;
+            }
+        }
+        await CriarHora();
+        await LoadHora();
+    }
+
+    async Task EditUniques(HorasComplementares hora, List<HorasComplementares> lista)
+    {
+        foreach (HorasComplementares s in lista)
+        {
+            if (hora.Status == s.Status)
+            {
+                Titulo = "Erro ao Editar";
+                SubTitulo = "";
+
+                ShowErrorModal();
+                return;
+            }
+        }
+        await EditarHora();
+        await LoadHora();
+    }
+
+    }
+}
+

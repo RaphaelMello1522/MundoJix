@@ -1,0 +1,27 @@
+﻿@page "/hora/criar"
+@inject HttpClient http
+@inject NavigationManager navigation
+@using MundoJix.Shared.Models
+@using MundoJix.Client.Pages.Aluno
+<h3>Cadastrar Aluno</h3>
+
+<FormHoraComplementar  horasComplementares="@horas" alunos="@alunos" ButtonText="Adicionar" OnValidSubmit="@CriarHora"></FormHoraComplementar>
+
+@code {
+    List<Aluno> alunos;
+    HorasComplementares horas = new HorasComplementares();
+
+
+    async Task LoadAluno()
+    {
+        alunos = await http.GetFromJsonAsync<List<Aluno>>($"api/aluno");
+
+    }
+
+    async Task CriarHora()
+    {
+        await LoadAluno();
+        await http.PostAsJsonAsync("api/hora", horas);
+        navigation.NavigateTo("hora");
+    }
+}

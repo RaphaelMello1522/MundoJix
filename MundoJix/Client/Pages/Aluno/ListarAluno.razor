@@ -1,0 +1,259 @@
+﻿@page "/aluno/lista"
+@page "/aluno"
+@inject HttpClient http
+@inject FilesManager FilesManager
+@using MundoJix.Shared.Models
+@using System.Text.Json
+
+<h3>Lista de Alunos</h3>
+
+<div>
+    <a href="aluno/criar" class="btn btn-secondary">Cadastrar Novo Aluno</a>
+</div>
+
+<div>
+    @if (alunos == null)
+    {
+        <text>Carregando...</text>
+    }
+    else if (alunos.Count == 0)
+    {
+        <text>Não há nenhum aluno registrado no sistema.</text>
+    }
+    else
+    {
+
+
+        <table class="table-bordered">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>RA</th>
+                    <th>Curso</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var aluno in alunos)
+                {
+                <tr>
+                    <td>@aluno.Nome</td>
+                    <td>@aluno.RA</td>
+                    <td>@aluno.Curso</td>
+                    <td>@aluno.Anexo</td>
+                    <td>
+
+                        <a class="btn btn-primary" href="aluno/editar/@aluno.Id">Editar</a>
+                        <button class="btn btn-warning" @onclick="@(() => ExcluirAluno(aluno.Id))">Excluir</button>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+
+    }
+
+</div>
+<h3>Files</h3>
+<ul>
+    @foreach (var url in FileUrls)
+    {
+        <li><a href="@url">@url</a><br /></li>
+    }
+</ul>
+
+@code {
+    @using MundoJix.Shared.Models
+
+    List<Aluno> alunos;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAlunos();
+        await ListFiles();
+    }
+
+
+    async Task LoadAlunos()
+    {
+        alunos = await http.GetFromJsonAsync<List<Aluno>>($"api/aluno");
+
+    }
+
+
+    async Task ExcluirAluno(int id)
+    {
+        await http.DeleteAsync($"api/aluno/{id}");
+        await LoadAlunos();
+    }
+
+
+    string ImageUrl = "";
+    bool Uploading = false;
+
+    bool UploadingLargeFile = false;
+    string LargeUploadMessage = "";
+    long UploadedBytes;
+    long TotalBytes;
+    List<string> FileUrls = new List<string>();
+
+    // support for drag/drop
+    string dropClass = string.Empty;
+    void HandleDragEnter()
+    {
+        dropClass = "dropAreaDrug";
+    }
+    void HandleDragLeave()
+    {
+        dropClass = string.Empty;
+    }
+
+    /// <summary>
+    /// Occurs when a large file is selected or dropped
+    /// </summary>
+    /// <param name="args"></param>
+    /// <returns></returns>
+    async Task OnLargeFileInputFileChange(InputFileChangeEventArgs args)
+    {
+        UploadedBytes = 0;
+
+        // Disable the file input field
+        UploadingLargeFile = true;
+        await InvokeAsync(StateHasChanged);
+
+        // calculate the chunks we have to send
+        TotalBytes = args.File.Size;
+        long percent = 0;
+        long chunkSize = 400000; // fairly arbitrary
+        long numChunks = TotalBytes / chunkSize;
+        long remainder = TotalBytes % chunkSize;
+
+        // get new filename with a bit of entropy
+        string justFileName = Path.GetFileNameWithoutExtension(args.File.Name);
+        var extension = Path.GetExtension(args.File.Name);
+        string newFileNameWithoutPath = $"{justFileName}-{DateTime.Now.Ticks.ToString()}{extension}";
+
+        bool firstChunk = true;
+
+        // Open the input and output file streams
+        using (var inStream = args.File.OpenReadStream(long.MaxValue))
+        {
+            for (int i = 0; i < numChunks; i++)
+            {
+                // Read the next chunk
+                var buffer = new byte[chunkSize];
+                await inStream.ReadAsync(buffer, 0, buffer.Length);
+
+                // create the FileChunk object
+                var chunk = new FileChunk
+                {
+                    Data = buffer,
+                    FileNameNoPath = newFileNameWithoutPath,
+                    Offset = UploadedBytes,
+                    FirstChunk = firstChunk
+                };
+
+                // upload this chunk
+                await FilesManager.UploadFileChunk(chunk);
+
+
+                firstChunk = false; // no longer the first chunk
+
+                // Update our progress data and UI
+                UploadedBytes += chunkSize;
+                percent = UploadedBytes * 100 / TotalBytes;
+                // Report progress with a string
+                LargeUploadMessage = $"Uploading {args.File.Name} {percent}%";
+                await InvokeAsync(StateHasChanged);
+            }
+
+            if (remainder > 0)
+            {
+                // Same stuff as above, just with the leftover chunk data
+                var buffer = new byte[remainder];
+                await inStream.ReadAsync(buffer, 0, buffer.Length);
+
+                // create the FileChunk object
+                var chunk = new FileChunk
+                {
+                    Data = buffer,
+                    FileNameNoPath = newFileNameWithoutPath,
+                    Offset = UploadedBytes,
+                    FirstChunk = firstChunk
+                };
+
+                // upload this chunk
+                await FilesManager.UploadFileChunk(chunk);
+
+                UploadedBytes += remainder;
+                percent = UploadedBytes * 100 / TotalBytes;
+                LargeUploadMessage = $"Uploading {args.File.Name} {percent}%";
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+
+        LargeUploadMessage = "Upload Complete.";
+        await ListFiles();
+
+        UploadingLargeFile = false;
+    }
+
+    async Task OnInputFileChange(InputFileChangeEventArgs args)
+    {
+        dropClass = string.Empty;
+
+        try
+        {
+            // disable the upload pane
+            Uploading = true;
+            await InvokeAsync(StateHasChanged);
+
+            // Resize to no more than 400x400
+            var format = "image/png/pdf";
+            var resizedImageFile = await args.File.RequestImageFileAsync(format, 400, 400);
+
+            // read resized png data into a buffer
+            var buffer = new byte[resizedImageFile.Size];
+            await resizedImageFile.OpenReadStream().ReadAsync(buffer);
+
+            // get new filename with a bit of entropy
+            string justFileName = Path.GetFileNameWithoutExtension(args.File.Name);
+            string newFileNameWithoutPath = $"{justFileName}-{DateTime.Now.Ticks.ToString()}.png";
+            string fileName = $"{Environment.CurrentDirectory}\\files\\{newFileNameWithoutPath}";
+
+            // upload png as one file chunk
+            var chunk = new FileChunk
+            {
+                Data = buffer,
+                FileNameNoPath = newFileNameWithoutPath,
+                Offset = 0,
+                FirstChunk = true
+            };
+
+            await FilesManager.UploadFileChunk(chunk);
+
+            ImageUrl = $"files/{newFileNameWithoutPath}";
+
+            await ListFiles();
+
+            Uploading = false;
+
+        }
+        catch (Exception ex)
+        {
+            Uploading = false;
+            await InvokeAsync(StateHasChanged);
+            System.Diagnostics.Debug.WriteLine(ex.Message);
+            throw;
+        }
+    }
+
+    async Task ListFiles()
+    {
+        FileUrls = await FilesManager.GetFileNames();
+        await InvokeAsync(StateHasChanged);
+    }
+
+
+
+}

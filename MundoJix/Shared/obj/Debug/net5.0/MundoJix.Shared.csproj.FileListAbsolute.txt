@@ -1,0 +1,15 @@
+C:\Users\rapha\source\repos\MundoJix\MundoJix\Shared\bin\Debug\net5.0\MundoJix.Shared.deps.json
+C:\Users\rapha\source\repos\MundoJix\MundoJix\Shared\bin\Debug\net5.0\MundoJix.Shared.runtimeconfig.json
+C:\Users\rapha\source\repos\MundoJix\MundoJix\Shared\bin\Debug\net5.0\MundoJix.Shared.runtimeconfig.dev.json
+C:\Users\rapha\source\repos\MundoJix\MundoJix\Shared\bin\Debug\net5.0\MundoJix.Shared.dll
+C:\Users\rapha\source\repos\MundoJix\MundoJix\Shared\bin\Debug\net5.0\ref\MundoJix.Shared.dll
+C:\Users\rapha\source\repos\MundoJix\MundoJix\Shared\bin\Debug\net5.0\MundoJix.Shared.pdb
+C:\Users\rapha\source\repos\MundoJix\MundoJix\Shared\obj\Debug\net5.0\MundoJix.Shared.csproj.AssemblyReference.cache
+C:\Users\rapha\source\repos\MundoJix\MundoJix\Shared\obj\Debug\net5.0\MundoJix.Shared.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\rapha\source\repos\MundoJix\MundoJix\Shared\obj\Debug\net5.0\MundoJix.Shared.AssemblyInfoInputs.cache
+C:\Users\rapha\source\repos\MundoJix\MundoJix\Shared\obj\Debug\net5.0\MundoJix.Shared.AssemblyInfo.cs
+C:\Users\rapha\source\repos\MundoJix\MundoJix\Shared\obj\Debug\net5.0\MundoJix.Shared.csproj.CoreCompileInputs.cache
+C:\Users\rapha\source\repos\MundoJix\MundoJix\Shared\obj\Debug\net5.0\MundoJix.Shared.dll
+C:\Users\rapha\source\repos\MundoJix\MundoJix\Shared\obj\Debug\net5.0\ref\MundoJix.Shared.dll
+C:\Users\rapha\source\repos\MundoJix\MundoJix\Shared\obj\Debug\net5.0\MundoJix.Shared.pdb
+C:\Users\rapha\source\repos\MundoJix\MundoJix\Shared\obj\Debug\net5.0\MundoJix.Shared.genruntimeconfig.cache

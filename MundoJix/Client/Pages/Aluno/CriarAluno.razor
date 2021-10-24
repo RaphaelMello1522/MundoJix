@@ -1,0 +1,18 @@
+﻿@page "/aluno/criar"
+@inject HttpClient http
+@inject NavigationManager navigation
+@using MundoJix.Shared.Models
+@using MundoJix.Client.Pages.Aluno
+<h3>Cadastrar Aluno</h3>
+
+<FormAluno Aluno="@aluno" ButtonText="Adicionar" OnValidSubmit="@CriarAlunos"></FormAluno>
+
+@code {
+    Aluno aluno = new Aluno();
+
+    async Task CriarAlunos()
+    {
+        await http.PostAsJsonAsync("api/aluno", aluno);
+        navigation.NavigateTo("lista/aluno");
+    }
+}

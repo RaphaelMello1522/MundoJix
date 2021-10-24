@@ -1,0 +1,62 @@
+﻿<EditForm Model="@horasComplementares" OnValidSubmit="@OnValidSubmit">
+
+    <DataAnnotationsValidator />
+
+
+    <div class="form-group">
+        <div><label>Para qual aluno?:</label></div>
+        <InputSelect class="form-control" @bind-Value="@horasComplementares.AlunoID">
+            <option value="">Selecione um aluno</option>
+            @foreach (var tipo in alunos)
+            {
+                <option value="@tipo.Id">@tipo.Nome</option>
+            }
+
+        </InputSelect>
+        
+    </div>
+
+    <div class="form-group">
+        <div><label>TipoAtividade</label></div>
+        <div><InputText @bind-Value="@horasComplementares.TipoAtividade"></InputText></div>
+        <ValidationMessage For="@(() => horasComplementares.TipoAtividade)"></ValidationMessage>
+
+    </div>
+
+
+    <div class="form-group">
+        <div><label>Quantidade de Horas</label></div>
+        <div><InputNumber @bind-Value="@horasComplementares.QntHoras"></InputNumber></div>
+        <ValidationMessage For="@(() => horasComplementares.QntHoras)"></ValidationMessage>
+    </div>
+
+    
+        <div class="form-group">
+            <div><label>Status</label></div>
+            <div>
+                <InputSelect @bind-Value="@horasComplementares.Status">
+                    <option value="1">Não Conferido</option>
+                    <option value="2">Conferido</option>
+                </InputSelect>
+            </div>
+        </div>
+
+
+  
+
+
+
+    <button type="submit" class="btn btn-primary">Adicionar</button>
+
+
+</EditForm>
+
+@code {
+    @using MundoJix.Shared.Models
+
+    [Parameter] public HorasComplementares horasComplementares { get; set; }
+    [Parameter] public List<Aluno> alunos { get; set; }
+    [Parameter] public string ButtonText { get; set; }
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+}
